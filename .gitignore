@@ -128,7 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# datasets
+# project folders
+test_images/
 datasets/
 
 # vscode
