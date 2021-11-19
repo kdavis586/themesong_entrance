@@ -1,9 +1,75 @@
 import cv2
-import tkinter
 from datetime import datetime
+from PIL import ImageTk, Image
+import tkinter as tk
 import os
 
+# Defaults for both CamCapture and CamDisplay classes
+DEFAULT_RES_WIDTH = 340
+DEFAULT_RES_HEIGHT = 240
+
+class CamCapture:
+  """Class for live camera feed capture.
+
+  Default values for the following parameters were chosen in mind for 
+  Raspberry Pi 4 Model B performance.
+
+  Attributes:
+    video_source: An integer for source of video, 0 picks default camera of device
+    res_width: An integer for the capture width resolution
+    res_height: An integer for the capture height resolution
+  """
+  def __init__(self, video_source: int = 0, res_width: int = DEFAULT_RES_WIDTH, res_height: int = DEFAULT_RES_HEIGHT):
+    """Inits CamCapture with source and capture resolution"""
+    self.capture = cv2.VideoCapture(video_source)
+    if not self.capture.isOpened():
+      raise IOError("Could not open camera: source = ", video_source)
+
+    self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, res_width)
+    self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, res_height)
+
+  def __del__(self):
+    if self.capture.isOpened():
+      self.capture.release()
+
+class CamDisplay:
+  """Class for displaying camera feed
+  
+  Attributes:
+    cam_source: A cv2 VideoCapture class to display frames from
+    res_width: An integer for the display width resolution
+    res_height: An integer for the display height resolution
+    display_title: A string for the name of the display window
+  """
+
+  def __init__(self, cam_source: cv2.VideoCapture, res_width: int = DEFAULT_RES_WIDTH, res_height: int = DEFAULT_RES_HEIGHT, display_title: str = "Camera Feed"):
+    self.cam_source = cam_source
+    self.window = tk.Tk()
+    self.window.geometry(str(res_width)+"x"+str(res_height)) # Arg must be in "widthxheight" string format
+    self.window.title(display_title)
+
+  def open(self):
+    self.window.mainloop()
+  
+  def display_frame(self):
+    ret, frame = self.cam_source.read()
+    if not ret:
+      raise RuntimeError("Could not read frame from camera source")
+
+    # Convert to RGB for PIL
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # Convert to PIL
+    frame = Image.fromarray(frame)
+
+    # Convert to ImageTk
+    frame = ImageTk.PhotoImage(frame)
+
+    #TODO Finish display frames consistently in tkinter window
     
+
+
+
 def create_dataset(name, path = "src/datasets/"):
     name = __normalize_name(name)
     cam = __init_cam()
@@ -30,17 +96,6 @@ def create_dataset(name, path = "src/datasets/"):
     cam.release()
     cv2.destroyAllWindows()
 
-
-def __init_cam():
-    cam = cv2.VideoCapture(0)
-    cam.set(cv2.CAP_PROP_FPS, 30)
-    cam.set(cv2.CAP_PROP_FRAME_WIDTH, 340)
-    cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-
-    if not cam.isOpened():
-        raise IOError('Camera could not be opened.')
-
-    return cam
 
 def __create_filepath(name, path):
     file_path = os.path.join(os.getcwd(), path, name + '/')
