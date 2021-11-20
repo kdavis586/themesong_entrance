@@ -16,17 +16,20 @@ class CamCapture:
 
   Attributes:
     video_source: An integer for source of video, 0 picks default camera of device
-    res_width: An integer for the capture width resolution
-    res_height: An integer for the capture height resolution
+    width: An integer for the capture width resolution
+    height: An integer for the capture height resolution
   """
-  def __init__(self, video_source: int = 0, res_width: int = DEFAULT_RES_WIDTH, res_height: int = DEFAULT_RES_HEIGHT):
+  def __init__(self, video_source: int = 0, width: int = DEFAULT_RES_WIDTH, height: int = DEFAULT_RES_HEIGHT):
     """Inits CamCapture with source and capture resolution"""
     self.capture = cv2.VideoCapture(video_source)
+    self.width = width
+    self.height = height
+
     if not self.capture.isOpened():
       raise IOError("Could not open camera: source = ", video_source)
 
-    self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, res_width)
-    self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, res_height)
+    self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+    self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
   def __del__(self):
     if self.capture.isOpened():
@@ -36,16 +39,14 @@ class CamDisplay:
   """Class for displaying camera feed
   
   Attributes:
-    cam_source: A cv2 VideoCapture class to display frames from
-    res_width: An integer for the display width resolution
-    res_height: An integer for the display height resolution
+    cam_source: A CamCapture object to get video feed from
     display_title: A string for the name of the display window
   """
 
-  def __init__(self, cam_source: cv2.VideoCapture, res_width: int = DEFAULT_RES_WIDTH, res_height: int = DEFAULT_RES_HEIGHT, display_title: str = "Camera Feed"):
+  def __init__(self, cam_source: CamCapture = CamCapture(), display_title: str = "Camera Feed"):
     self.cam_source = cam_source
     self.window = tk.Tk()
-    self.window.geometry(str(res_width)+"x"+str(res_height)) # Arg must be in "widthxheight" string format
+    self.window.geometry(f"{cam_source.width}x{cam_source.height}") # Arg must be in "widthxheight" string format
     self.window.title(display_title)
 
   def open(self):
@@ -65,23 +66,23 @@ class CamDisplay:
     # Convert to ImageTk
     frame = ImageTk.PhotoImage(frame)
 
-    #TODO Finish display frames consistently in tkinter window
+    # Create label for image display
+    panel = tk.Label(self.window, image=frame)
+    panel.pack(side = "bottom", fill="both", expand="yes")
+
+    # Return frame displayed
+    return frame
     
 
 
 
 def create_dataset(name, path = "src/datasets/"):
     name = __normalize_name(name)
-    cam = __init_cam()
+    display = CamDisplay()
+    display.open()
 
     while True:
-        retval, frame = cam.read()
-
-        if not retval:
-            raise RuntimeError('Could not retrieve frame')
-
-        cv2.imshow('Camera Feed', frame)
-        print(cv2.getWindowProperty('Camera Feed', cv2.WND_PROP_VISIBLE))
+        
         key = cv2.waitKey(1)
         # Save image to dataset on SPACE
         if key == 32:
