@@ -1,12 +1,13 @@
 import cv2
 from datetime import datetime
 from PIL import ImageTk, Image
-import tkinter as tk
+import Tkinter as tk
 import os
 
 # Defaults for both CamCapture and CamDisplay classes
 DEFAULT_RES_WIDTH = 340
 DEFAULT_RES_HEIGHT = 240
+DEFAULT_IMG_SAVE_PATH = "src/datasets/"
 
 class CamCapture:
   """Class for live camera feed capture.
@@ -52,6 +53,9 @@ class CamDisplay:
   def open(self):
     self.window.mainloop()
   
+  def close():
+    self.window.destroy()
+  
   def display_frame(self):
     ret, frame = self.cam_source.read()
     if not ret:
@@ -76,14 +80,15 @@ class CamDisplay:
 
 
 
-def create_dataset(name, path = "src/datasets/"):
+def create_dataset(name, path = DEFAULT_IMG_SAVE_PATH):
     name = __normalize_name(name)
     display = CamDisplay()
     display.open()
 
     while True:
-        
-        key = cv2.waitKey(1)
+        frame = self.cam_source.display_frame()
+        # Get the last byte of waitkey to avoid modifier key interferance
+        key = cv2.waitKey(1) & 0xFF
         # Save image to dataset on SPACE
         if key == 32:
             file_path = __create_filepath(name, path)
@@ -94,18 +99,17 @@ def create_dataset(name, path = "src/datasets/"):
         if key == 27:
             break
 
-    cam.release()
-    cv2.destroyAllWindows()
+    display.close()
 
 
 def __create_filepath(name, path):
-    file_path = os.path.join(os.getcwd(), path, name + '/')
+    file_path = os.path.join(os.getcwd(), path, f"{name}/")
 
     # Is there a dataset for this name? Create one if not
     if not os.path.isdir(file_path):
         os.mkdir(file_path)
 
-    file_path += __format_date_name() + name + '.jpg'
+    file_path = f"{file_path}{__format_date_name()}{name}.jpg"
 
     return file_path
 
