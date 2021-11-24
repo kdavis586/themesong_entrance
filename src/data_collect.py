@@ -12,17 +12,16 @@ collection of images of the user to be used in the recognition training.
         create_dataset(path_to_save_dataset)
 """
 
-# @TODO: Optimize imports to only what is needed here.
-import cv2
+from cv2 import cvtColor, VideoCapture, COLOR_BGR2RGB, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH
 from datetime import datetime
 from PIL import ImageTk, Image
-import tkinter as tk
-import os
+from tkinter import Tk, Label
+from os import getcwd, mkdir, path
 
 # Defaults for both CamCapture and CamDisplay classes
 DEFAULT_RES_WIDTH = 340
 DEFAULT_RES_HEIGHT = 240
-DEFAULT_DATASET_PATH = os.path.join(os.getcwd(), "datasets/")
+DEFAULT_DATASET_PATH = path.join(getcwd(), "datasets/")
 DEFAULT_FRAME_INTERVAL = 10
 
 # Default error message for CamCapture class
@@ -53,12 +52,12 @@ def _create_dir(name: str, path: str):
     """
 
     already_exists = True
-    file_path = os.path.join(path, f"{name}/")
+    file_path = path.join(path, f"{name}/")
 
     # Is there a dataset for this name? Create one if not
-    if not os.path.isdir(file_path):
+    if not path.isdir(file_path):
         already_exists = False
-        os.mkdir(file_path)
+        mkdir(file_path)
 
     return already_exists, file_path
 
@@ -145,15 +144,15 @@ class CamCapture:
             height: An integer representing the capture resolution height
         """
 
-        self.capture = cv2.VideoCapture(0, video_source)
+        self.capture = VideoCapture(0, video_source)
         self.width = width
         self.height = height
 
         if not self.capture.isOpened():
             raise IOError(CAMERA_SOURCE_ERR_MSG + video_source)
 
-        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.capture.set(CAP_PROP_FRAME_WIDTH, self.width)
+        self.capture.set(CAP_PROP_FRAME_HEIGHT, self.height)
 
     def close(self):
         """Releases the cv2 VideoCapture object."""
@@ -180,7 +179,7 @@ class CamDisplay:
             height_res: The resolution of the height
         """
 
-        win = tk.Tk()
+        win = Tk()
         # @TODO Make window resizable later
         win.resizable(width=False, height=False)
         pos_horz = int(win.winfo_screenwidth()/2 - width_res/2)
@@ -204,7 +203,7 @@ class CamDisplay:
             self.cam_source.width, self.cam_source.height)
         self.root.title(display_title)
         self.root.bind('<Escape>', lambda event: self.root.quit())
-        self.video = tk.Label(self.root)
+        self.video = Label(self.root)
         self.video.pack()
 
     def _display_frame(self):
@@ -213,7 +212,7 @@ class CamDisplay:
             raise RuntimeError(DISPLAY_FRAME_ERR_MSG)
 
         # Convert cv2 frame to ImageTk for tkinter window
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cvtColor(frame, COLOR_BGR2RGB)
         frame = Image.fromarray(frame)
         frame = ImageTk.PhotoImage(frame)
 
