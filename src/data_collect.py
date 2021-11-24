@@ -1,3 +1,18 @@
+"""Used to create datasets used in facial recognition training.
+
+This module contains functions and classes used to prompt a user
+for dataset creation. The user is then showed live feed from their
+device's default camera. From there, the user may save photos from the
+camera do a dataset folder created for them. This allows for the easy
+collection of images of the user to be used in the recognition training.
+
+    Typical usage example:
+    
+    if user_wants_a_dataset:
+        create_dataset(path_to_save_dataset)
+"""
+
+# @TODO: Optimize imports to only what is needed here.
 import cv2
 from datetime import datetime
 from PIL import ImageTk, Image
