@@ -11,17 +11,17 @@ collection of images of the user to be used in the recognition training.
     if user_wants_a_dataset:
         create_dataset(path_to_save_dataset)
 """
-
-from cv2 import cvtColor, VideoCapture, COLOR_BGR2RGB, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH
+import os
 from datetime import datetime
-from PIL import ImageTk, Image
 from tkinter import Tk, Label
-from os import getcwd, mkdir, path
+from cv2 import cvtColor, VideoCapture, COLOR_BGR2RGB, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH
+from PIL import ImageTk, Image
+
 
 # Defaults for both CamCapture and CamDisplay classes
 DEFAULT_RES_WIDTH = 340
 DEFAULT_RES_HEIGHT = 240
-DEFAULT_DATASET_PATH = path.join(getcwd(), "datasets/")
+DEFAULT_DATASET_PATH = os.path.join(os.getcwd(), "datasets/")
 DEFAULT_FRAME_INTERVAL = 10
 
 # Default error message for CamCapture class
@@ -31,7 +31,8 @@ CAMERA_SOURCE_ERR_MSG = "Could not open camera: source = "
 DISPLAY_FRAME_ERR_MSG = "Could not read frame from camera source."
 
 # Prompts for _handle_existing_dataset
-EXISTING_DATASET_PROMPT = "Dataset for this name already exists, continue to add more samples? (y/n): "
+EXISTING_DATASET_PROMPT = """Dataset for this name already exists, 
+continue to add more samples? (y/n): """
 UNKNOWN_RESPONSE_PROMPT = '\nPlease respond with "y" or "n"'
 
 # Prompt for create_dataset
@@ -55,9 +56,9 @@ def _create_dir(name: str, path: str):
     file_path = path.join(path, f"{name}/")
 
     # Is there a dataset for this name? Create one if not
-    if not path.isdir(file_path):
+    if not os.path.isdir(file_path):
         already_exists = False
-        mkdir(file_path)
+        os.mkdir(file_path)
 
     return already_exists, file_path
 
@@ -171,7 +172,8 @@ class CamDisplay:
     """
 
     def _centered_tk(self, width_res: int, height_res: int):
-        """A helper function that creates a screen-centered tkinter window at a specified resolution.
+        """A helper function that creates a screen-centered
+           tkinter window with the given resolution.
 
         Args:
             win: The tkinter window to center
