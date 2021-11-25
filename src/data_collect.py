@@ -96,7 +96,6 @@ def _normalize(string: str):
 
 def _save_frame(name, dataset_path, frame: Image.Image):
     """Saves the ImageTk input frame at dataset path with a standardized name."""
-    print(type(frame))
     img_path = f"{dataset_path}/{_get_time_string()}{name}.png"
     frame.save(img_path)
 
