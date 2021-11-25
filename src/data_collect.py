@@ -12,6 +12,7 @@ collection of images of the user to be used in the recognition training.
         create_dataset(path_to_save_dataset)
 """
 import os
+import re
 from datetime import datetime
 from tkinter import Tk, Label
 from cv2 import cvtColor, VideoCapture, COLOR_BGR2RGB, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH
@@ -53,7 +54,7 @@ def _create_dir(name: str, path: str):
     """
 
     already_exists = True
-    file_path = path.join(path, f"{name}/")
+    file_path = os.path.join(path, f"{name}/")
 
     # Is there a dataset for this name? Create one if not
     if not os.path.isdir(file_path):
@@ -74,10 +75,10 @@ def _get_time_string():
              time.hour, time.minute, time.second)
 
     # Create string from units of time down to second
-    date_str = ''
+    date_str = ""
     for unit in units:
         date_str += str(unit)
-        date_str += '_'
+        date_str += "_"
 
     return date_str
 
@@ -87,19 +88,17 @@ def _normalize(string: str):
 
     Returns: A string of the normalized input string. Ex. input = "fOO bAr", output = "foo_bar"
     """
-
-    string = ''.join([c for c in string if c.isalpha()
-                      or c.isdigit() or c == ' ']).strip().lower()
-    string = string.replace(' ', '_')
+    string = string.strip().lower()
+    string = re.sub(r"[^(a-z0-9)]", "_", string)
 
     return string
 
 
-def _save_frame(name, dataset_path, frame: ImageTk.PhotoImage):
+def _save_frame(name, dataset_path, frame: Image.Image):
     """Saves the ImageTk input frame at dataset path with a standardized name."""
-    img = ImageTk.getimage(frame)
-    img_path = f"{dataset_path}{_get_time_string()}{name}.png"
-    img.save(img_path)
+    print(type(frame))
+    img_path = f"{dataset_path}/{_get_time_string()}{name}.png"
+    frame.save(img_path)
 
 
 def _handle_existing_dataset():
@@ -219,7 +218,7 @@ class CamDisplay:
         frame = ImageTk.PhotoImage(frame)
 
         # Update video label with new frame
-        self.video.image = frame
+        self.video.imagetk = frame
         self.video.configure(image=frame)
 
         self.root.after(DEFAULT_FRAME_INTERVAL, self._display_frame)
@@ -263,7 +262,7 @@ def create_dataset(path: str = DEFAULT_DATASET_PATH):
     feed = CamDisplay()
     # bind saving image to spacebar
     feed.root.bind("<space>", lambda event: _save_frame(
-        name, dataset_path, feed.video.image))
+        name, dataset_path, ImageTk.getimage(feed.video.imagetk)))
     feed.show()
 
     # Release VideoCapture object and destroy opened windows
