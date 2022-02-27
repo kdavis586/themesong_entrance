@@ -3,7 +3,8 @@ import os
 import csv
 from src import cnn
 
-TEST_CSV_1_VALUES = [[os.path.join(os.getcwd(), "test", "test_images", "test_labeled_folder", "test_img_1.png"), "test_labeled_folder"]]
+TEST_CSV_1_VALUES = [[os.path.join(os.getcwd(), "test", "test_images", "test_labeled_folder", "test_img_1.png"), "test_labeled_folder"],
+                    [os.path.join(os.getcwd(), "test", "test_images", "test_labeled_folder_2", "test_img_1.png"), "test_labeled_folder_2"]]
 
 
 class CnnTests(unittest.TestCase):
