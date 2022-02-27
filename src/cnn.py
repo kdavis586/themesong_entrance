@@ -33,6 +33,20 @@ def _create_cnn_csv(path: str, csv_name: str = "labeled_data"):
         path: The path to parent folder which contains all of the datasets
         csv_name: The name for the csv file that will be created (without .csv in the name)
     """
-    csv_path = f"{path}{csv_name}.csv"
-    labeled_data = open(csv_path, "w")
-    """TODO: walk through the datasets folder and get all image files into csv"""
+    csv_path = os.path.join(path, f"{csv_name}.csv")
+
+    with open(csv_path, "w") as labeled_data:
+        writer = csv.writer(labeled_data, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        for dirname in os.listdir(path):
+            dirpath = os.path.join(path, dirname)
+
+            if os.path.isdir(dirpath):
+                # Loop through all files in this folder
+                for filename in os.listdir(dirpath):
+                    filepath = os.path.join(dirpath, filename)
+
+                    if os.path.isfile(filepath):
+                        # dirname will serve as the label for all files in it
+                        writer.writerow([filepath, dirname])
+

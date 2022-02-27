@@ -22,7 +22,7 @@ from PIL import ImageTk, Image
 # Defaults for both CamCapture and CamDisplay classes
 DEFAULT_RES_WIDTH = 340
 DEFAULT_RES_HEIGHT = 240
-DEFAULT_DATASET_PATH = os.path.join(os.getcwd(), "datasets/")
+DEFAULT_DATASET_PATH = os.path.join(os.getcwd(), "datasets")
 DEFAULT_FRAME_INTERVAL = 10
 
 # Default error message for CamCapture class
@@ -54,7 +54,7 @@ def _create_dir(name: str, path: str):
     """
 
     already_exists = True
-    file_path = os.path.join(path, f"{name}/")
+    file_path = os.path.join(path, name)
 
     # Is there a dataset for this name? Create one if not
     if not os.path.isdir(file_path):
@@ -249,6 +249,8 @@ def create_dataset(path: str = DEFAULT_DATASET_PATH):
 
     name = input(DATASET_PROMPT)
     name = _normalize(name)
+    # create dataset parent folder if it doesn't already exist
+    _create_dir("datasets", os.getcwd())
     # create dataset folder for name if it doesn't already exist
     already_exists, dataset_path = _create_dir(name, path)
 
