@@ -50,3 +50,5 @@ def _create_cnn_csv(path: str, csv_name: str = "labeled_data"):
                         # dirname will serve as the label for all files in it
                         writer.writerow([filepath, dirname])
 
+def something():
+    print("This is garbage...")

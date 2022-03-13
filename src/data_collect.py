@@ -214,11 +214,19 @@ class CamDisplay:
         # Convert cv2 frame to ImageTk for tkinter window
         frame = cvtColor(frame, COLOR_BGR2RGB)
         frame = Image.fromarray(frame)
-        frame = ImageTk.PhotoImage(frame)
+        # Keep an unaltered frame for save frame
+        # (we want to train on the images the camera
+        # originally sees, not the flippes ones)
+        raw_frame = ImageTk.PhotoImage(frame)
+
+        # Flip display frame across y-axis to display "like a mirror"
+        mirror_frame = frame.transpose(Image.FLIP_LEFT_RIGHT)
+        mirror_frame = ImageTk.PhotoImage(mirror_frame)
 
         # Update video label with new frame
-        self.video.imagetk = frame
-        self.video.configure(image=frame)
+        self.video.raw_frame = raw_frame
+        self.video.mirror_frame = mirror_frame
+        self.video.configure(image=mirror_frame)
 
         self.root.after(DEFAULT_FRAME_INTERVAL, self._display_frame)
 
@@ -263,7 +271,7 @@ def create_dataset(path: str = DEFAULT_DATASET_PATH):
     feed = CamDisplay()
     # bind saving image to spacebar
     feed.root.bind("<space>", lambda event: _save_frame(
-        name, dataset_path, ImageTk.getimage(feed.video.imagetk)))
+        name, dataset_path, ImageTk.getimage(feed.video.raw_frame)))
     feed.show()
 
     # Release VideoCapture object and destroy opened windows
