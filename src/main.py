@@ -1,13 +1,13 @@
-#%%
-from data_collect import create_dataset
-from cnn import create_tensorflow_dataset
 import os
 
-import matplotlib
-import matplotlib.pyplot as plt
+from cli import run_cli
 
+# TODO this is temporary, find a longterm solution for finding dataset path
 DATASET_DIR = os.path.join(os.getcwd(), "datasets")
 
-#create_dataset()
-create_tensorflow_dataset(DATASET_DIR)
-# %%
+def main():
+    run_cli()
+
+if __name__ == "__main__":
+    main()
+

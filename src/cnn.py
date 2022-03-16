@@ -62,7 +62,7 @@ def _create_cnn_csv(path: str, csv_name: str = "labeled_data"):
                         # dirname will serve as the label for all files in it
                         writer.writerow([filepath, dirname])
 
-def create_tensorflow_dataset(dataset_dir):
+def make_and_train_model(dataset_dir):
     # Creating training and validation datasets
     train_ds = tf.keras.utils.image_dataset_from_directory(
         dataset_dir,
