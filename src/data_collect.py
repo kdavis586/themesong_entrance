@@ -15,18 +15,16 @@ import os
 import re
 from datetime import datetime
 from tkinter import Tk, Label
-from cv2 import cvtColor, VideoCapture, COLOR_BGR2RGB, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH
+from cv2 import cvtColor, VideoCapture, COLOR_BGR2RGB, CAP_PROP_FRAME_HEIGHT, CAP_PROP_FRAME_WIDTH, CAP_ANY
 from PIL import ImageTk, Image
 
 
 # Defaults for both CamCapture and CamDisplay classes
-DEFAULT_RES_WIDTH = 340
-DEFAULT_RES_HEIGHT = 240
 DEFAULT_DATASET_PATH = os.path.join(os.getcwd(), "datasets")
 DEFAULT_FRAME_INTERVAL = 10
 
 # Default error message for CamCapture class
-CAMERA_SOURCE_ERR_MSG = "Could not open camera: source = "
+CAMERA_SOURCE_ERR_MSG = "Could not open camera."
 
 # Default error message for CamDisplay class
 DISPLAY_FRAME_ERR_MSG = "Could not read frame from camera source."
@@ -64,7 +62,7 @@ def _create_dir(name: str, path: str):
     return already_exists, file_path
 
 
-def _get_time_string():
+def get_time_string():
     """Creates a string representing the current time down to the second.
 
     Returns: A string representing the current time in the format YYYY_MM_DD_HH_MM_SS
@@ -83,7 +81,7 @@ def _get_time_string():
     return date_str
 
 
-def _normalize(string: str):
+def normalize(string: str):
     """Takes a string and normalizes it for future file naming.
 
     Returns: A string of the normalized input string. Ex. input = "fOO bAr", output = "foo_bar"
@@ -96,7 +94,7 @@ def _normalize(string: str):
 
 def _save_frame(name, dataset_path, frame: Image.Image):
     """Saves the ImageTk input frame at dataset path with a standardized name."""
-    img_path = f"{dataset_path}/{_get_time_string()}{name}.png"
+    img_path = os.path.join(dataset_path, f"{get_time_string()}{name}.png")
     frame.save(img_path)
 
 
@@ -133,25 +131,16 @@ class CamCapture:
                     height: An integer for the capture height resolution
     """
 
-    def __init__(self, video_source: int = 0, width: int = DEFAULT_RES_WIDTH,
-                 height: int = DEFAULT_RES_HEIGHT):
-        """Initializes CamCapture with camera source and capture resolution.
+    def __init__(self):
+        """Initializes CamCapture with camera source and capture resolution."""
 
-        Args:
-            video_source: An integer representing which source to use for video capture
-            width: An integer representing the capture resolution width
-            height: An integer representing the capture resolution height
-        """
-
-        self.capture = VideoCapture(0, video_source)
-        self.width = width
-        self.height = height
+        # What if the user wants to use a different resolution??
+        self.capture = VideoCapture(CAP_ANY)
+        self.width = int(self.capture.get(CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.capture.get(CAP_PROP_FRAME_HEIGHT))
 
         if not self.capture.isOpened():
-            raise IOError(CAMERA_SOURCE_ERR_MSG + video_source)
-
-        self.capture.set(CAP_PROP_FRAME_WIDTH, self.width)
-        self.capture.set(CAP_PROP_FRAME_HEIGHT, self.height)
+            raise IOError(CAMERA_SOURCE_ERR_MSG)
 
     def close(self):
         """Releases the cv2 VideoCapture object."""
@@ -256,7 +245,7 @@ def create_dataset(path: str = DEFAULT_DATASET_PATH):
     """
 
     name = input(DATASET_PROMPT)
-    name = _normalize(name)
+    name = normalize(name)
     # create dataset parent folder if it doesn't already exist
     _create_dir("datasets", os.getcwd())
     # create dataset folder for name if it doesn't already exist
